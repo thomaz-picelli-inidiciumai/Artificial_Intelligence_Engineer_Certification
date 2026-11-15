@@ -1,0 +1,33 @@
+# Segredos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Dados (grandes e potencialmente sensíveis: não versionar)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Logs de auditoria locais (mantemos apenas um exemplo em docs/)
+audit_logs/*
+!audit_logs/.gitkeep
+
+# Saídas geradas
+reports/*
+!reports/.gitkeep
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
