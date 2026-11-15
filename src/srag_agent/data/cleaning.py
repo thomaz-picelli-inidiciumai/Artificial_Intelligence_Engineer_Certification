@@ -26,12 +26,19 @@ CATEGORY_COLUMNS = ["HOSPITAL", "UTI", "EVOLUCAO", "VACINA_COV"]
 VALID_CODES = {1, 2, 3, 9}
 
 
+def _parse_dates(series: pd.Series) -> pd.Series:
+    """O CSV atual traz datas ISO (2025-07-23T00:00:00.000Z); aceita também dd/mm/aaaa."""
+    iso = pd.to_datetime(series, format="ISO8601", errors="coerce", utc=True).dt.tz_localize(None)
+    br = pd.to_datetime(series, format="%d/%m/%Y", errors="coerce")
+    return iso.fillna(br)
+
+
 def clean(raw: pd.DataFrame) -> pd.DataFrame:
     """Aplica os tratamentos de qualidade sobre um DataFrame bruto."""
     df = raw.copy()
 
     for col in DATE_COLUMNS:
-        df[col] = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce")
+        df[col] = _parse_dates(df[col])
 
     # Sem data de notificação o caso não entra em nenhuma série temporal.
     df = df.dropna(subset=["DT_NOTIFIC"])
@@ -51,14 +58,10 @@ def clean(raw: pd.DataFrame) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
-def load_srag_csv(path: str | Path) -> pd.DataFrame:
-    """Lê o CSV do DATASUS (separador ';') carregando apenas as colunas úteis."""
-    raw = pd.read_csv(
-        path,
-        sep=";",
-        usecols=COLUMNS,
-        dtype=str,
-        encoding="latin-1",
-        low_memory=False,
-    )
-    return clean(raw)
+def load_srag_csv(*paths: str | Path) -> pd.DataFrame:
+    """Lê um ou mais CSVs do DATASUS (separador ';'), só com as colunas úteis."""
+    frames = [
+        pd.read_csv(p, sep=";", usecols=COLUMNS, dtype=str, encoding="latin-1", low_memory=False)
+        for p in paths
+    ]
+    return clean(pd.concat(frames, ignore_index=True))

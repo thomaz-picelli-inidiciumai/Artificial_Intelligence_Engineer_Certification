@@ -27,7 +27,7 @@ class Metrics:
 
 
 def _ratio(numerator: int, denominator: int) -> float | None:
-    return round(100 * numerator / denominator, 2) if denominator else None
+    return round(100 * float(numerator) / float(denominator), 2) if denominator else None
 
 
 def default_as_of(df: pd.DataFrame) -> pd.Timestamp:
