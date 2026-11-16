@@ -14,6 +14,7 @@ from srag_agent.report.builder import build_report
 
 def main() -> int:
     load_dotenv()
+    sys.stdout.reconfigure(encoding="utf-8")  # o console do Windows (cp1252) quebra com "−", "é" etc.
     audit = AuditLog()
     agent = create_agent(GovernedExecutor(audit), audit)
     try:

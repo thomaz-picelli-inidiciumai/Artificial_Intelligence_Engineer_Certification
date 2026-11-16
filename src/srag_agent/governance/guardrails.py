@@ -80,6 +80,8 @@ class ToolPolicy:
 def check_report(text: str, metrics: dict) -> list[str]:
     """Problemas encontrados no relatório (lista vazia = aprovado)."""
     issues = []
+    # O modelo costuma escrever o sinal de menos como "−" (U+2212) ou "–"; normaliza antes de comparar.
+    normalized = text.replace("−", "-").replace("–", "-").replace(".", ",")
     for key, label in {
         "case_growth_rate": "taxa de aumento de casos",
         "mortality_rate": "taxa de mortalidade",
@@ -87,7 +89,7 @@ def check_report(text: str, metrics: dict) -> list[str]:
         "vaccination_rate": "taxa de vacinação",
     }.items():
         value = metrics.get(key)
-        if value is not None and f"{value:.2f}".replace(".", ",") not in text.replace(".", ","):
+        if value is not None and f"{value:.2f}".replace(".", ",") not in normalized:
             issues.append(f"valor de {label} ({value}) não aparece no relatório")
     _, pii = redact_pii(text)
     issues.extend(f"possível dado sensível no relatório: {p}" for p in pii)
