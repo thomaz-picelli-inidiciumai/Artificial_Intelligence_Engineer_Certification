@@ -58,6 +58,7 @@ def test_check_report_flags_missing_values_and_pii():
                "icu_rate": 26.58, "vaccination_rate": 40.5}
     ok = "Aumento -21,87%, mortalidade 4,57%, UTI 26,58%, vacinação 40,50%."
     assert check_report(ok, metrics) == []
+    assert check_report(ok.replace("-21,87", "−21,87"), metrics) == []  # sinal tipográfico
     bad = check_report("Mortalidade 4,57%. Contato: x@y.com", metrics)
     assert any("UTI" in i for i in bad) and any("email" in i for i in bad)
 

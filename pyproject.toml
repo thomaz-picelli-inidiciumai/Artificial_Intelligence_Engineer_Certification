@@ -12,6 +12,7 @@ dependencies = [
     "httpx",
     "trafilatura",
     "python-dotenv",
+    "markdown",
 ]
 
 [project.optional-dependencies]

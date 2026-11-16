@@ -5,15 +5,18 @@ import sys
 import anthropic
 from dotenv import load_dotenv
 
-from srag_agent.agent.orchestrator import AgentError, ReportAgent
+from srag_agent.agent.factory import create_agent
+from srag_agent.agent.orchestrator import AgentError
 from srag_agent.governance.audit import AuditLog
 from srag_agent.governance.executor import GovernedExecutor
+from srag_agent.report.builder import build_report
 
 
 def main() -> int:
     load_dotenv()
+    sys.stdout.reconfigure(encoding="utf-8")  # o console do Windows (cp1252) quebra com "−", "é" etc.
     audit = AuditLog()
-    agent = ReportAgent(GovernedExecutor(audit), audit)
+    agent = create_agent(GovernedExecutor(audit), audit)
     try:
         report = agent.run()
     except AgentError as exc:
@@ -23,8 +26,10 @@ def main() -> int:
         audit.log("api_error", status=exc.status_code, message=exc.message)
         print(f"Erro da API Anthropic ({exc.status_code}): {exc.message}", file=sys.stderr)
         return 1
+    path = build_report(report, agent.metrics)
+    audit.log("report_saved", path=str(path))
     print(report)
-    print(f"\n[auditoria: {audit.path}]", file=sys.stderr)
+    print(f"\n[relatório: {path}]\n[auditoria: {audit.path}]", file=sys.stderr)
     return 0
 
 
