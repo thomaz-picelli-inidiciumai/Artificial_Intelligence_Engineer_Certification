@@ -5,7 +5,8 @@ import sys
 import anthropic
 from dotenv import load_dotenv
 
-from srag_agent.agent.orchestrator import AgentError, ReportAgent
+from srag_agent.agent.factory import create_agent
+from srag_agent.agent.orchestrator import AgentError
 from srag_agent.governance.audit import AuditLog
 from srag_agent.governance.executor import GovernedExecutor
 from srag_agent.report.builder import build_report
@@ -14,7 +15,7 @@ from srag_agent.report.builder import build_report
 def main() -> int:
     load_dotenv()
     audit = AuditLog()
-    agent = ReportAgent(GovernedExecutor(audit), audit)
+    agent = create_agent(GovernedExecutor(audit), audit)
     try:
         report = agent.run()
     except AgentError as exc:
